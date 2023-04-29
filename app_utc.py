@@ -1,7 +1,7 @@
 import base64
-# import uvicorn
+import uvicorn
 from fastapi import FastAPI,File
-import io
+# import io
 import pandas as pd
 import numpy as np
 # from pathlib import Path
@@ -28,7 +28,7 @@ import librosa.display
 # from sklearn.metrics import mean_squared_error, r2_score
 # #OPTIMIZER
 # from keras.optimizers import RMSprop,Adam,Optimizer,Optimizer, SGD
-#MODEL LAYERS
+# #MODEL LAYERS
 # from keras import models
 # from keras import layers
 # import tensorflow as tf
@@ -57,6 +57,7 @@ import keras
 # from sklearn.linear_model import LassoCV
 # from sklearn.linear_model import ElasticNet
 # from sklearn.linear_model import ElasticNetCV
+import pickle
 from tensorflow import keras
 #IGNORING WARNINGS
 from warnings import filterwarnings
@@ -75,7 +76,7 @@ app=FastAPI()
 compile_metrics = ["accuracy"]
 compile_loss = "categorical_crossentropy"
 compile_optimizer = "adam"
-model = keras.models.load_model(r"urban_traffic_model_2.h5",compile=False)
+model = keras.models.load_model("urbantrafficmodelfinal.h5",compile=False)
 model.compile(optimizer=compile_optimizer,loss=compile_loss,metrics=compile_metrics)
 
 def export_function(path):
@@ -169,15 +170,19 @@ async def predict(file: audio):
     wav_file.write(decode_string)
     x_Train1 = []
     y_Train1 = []   
-    wav_features = export_function('temp.wav')  
+    wav_features = export_function("temp.wav")  
     for indexing in wav_features:
         x_Train1.append(indexing)
         y_Train1.append('')
-    New_Features_Wav1 = pd.DataFrame(x_Train1)
 
+    New_Features_Wav1 = pd.DataFrame(x_Train1)
     New_Features_Wav1["CATEGORY"] = y_Train1
     Part_X1 = New_Features_Wav1.iloc[:,:-1].values
-    Part_X1 = Part_X1.reshape(Part_X1.shape[0], 18, 9, 1)
+    # OHE_Function = OneHotEncoder()
+    with open('./scaler.pkl', 'rb') as f:
+        Scaler_Function = pickle.load(f)
+    Part_X1=Scaler_Function.transform(Part_X1)
+    Part_X1 = Part_X1.reshape(Part_X1.shape[0], 162, 1)
     prediction_test_Conv2D1 = model.predict(Part_X1)
     prediction_test_Conv2D_Arg1 = np.argmax(prediction_test_Conv2D1,axis=1)
     print(prediction_test_Conv2D_Arg1)
