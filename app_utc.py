@@ -76,7 +76,7 @@ app=FastAPI()
 compile_metrics = ["accuracy"]
 compile_loss = "categorical_crossentropy"
 compile_optimizer = "adam"
-model = keras.models.load_model(r"C:\Coding\projectSchool\urbantrafficcontrol\production\urbantrafficmodelfinal.h5",compile=False)
+model = keras.models.load_model(r"urbantrafficmodelfinal.h5",compile=False)
 model.compile(optimizer=compile_optimizer,loss=compile_loss,metrics=compile_metrics)
 
 def export_function(path):
